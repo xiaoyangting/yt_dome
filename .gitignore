@@ -1,0 +1,2 @@
+# 忽略所有 node_modules
+*/node_modules/*

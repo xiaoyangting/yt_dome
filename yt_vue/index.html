@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <div id="app" class="cs">{{ name }}测试{{obj}}嘻嘻嘻<span>
+      你好呀 Vue
+    </span>
+  </div>
+  <script src="./dist/vue.js"></script>
+  <script>
+    var vm = new Vue({
+      el: '#app',
+      data() {
+        return {
+          name: '你好呀 杨挺',
+          obj: {
+            cs: '你好 cs'
+          },
+          arr: [1, 2, 3, 4, {cs: 'hahah'}]
+        }
+      },
+    })
+
+    // console.log(vm);
+    setTimeout(() => {
+      vm.name = '你好呀 vue'
+      vm.$nextTick(() => {
+        console.log(vm.$el);
+      })
+      console.log(1);
+      Promise.resolve().then(() => console.log(3))
+      // vm._update(vm._render())
+    }, 1000);
+    setTimeout(() => {
+      console.log(2);
+    }, 1000);
+    // console.log(vm.name);
+    // console.log(vm.arr.push({
+    //   cs: 'xixi'
+    // }));
+    // console.log(vm.arr);
+  </script>
+</body>
+</html>
