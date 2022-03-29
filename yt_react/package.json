@@ -12,7 +12,7 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "set DISABLE_NEW_JSX_TRANSFORM&&react-scripts start",
+    "start": "set DISABLE_NEW_JSX_TRANSFORM=true&&react-scripts start",
     "build": "set DISABLE_NEW_JSX_TRANSFORM=true&&react-scripts build",
     "test": "set DISABLE_NEW_JSX_TRANSFORM=true&&react-scripts test",
     "eject": "set DISABLE_NEW_JSX_TRANSFORM=true&&react-scripts eject"

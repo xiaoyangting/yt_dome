@@ -1,3 +1,4 @@
+import { Component } from "./component"
 import { wrapToVdom } from "./utils"
 
 /**
@@ -13,7 +14,7 @@ function createElement(type, config, children) {
   // children 可能是一个字符串, 也可能是一个数字, 也可能是个null undefined, 也可能是一个数组 对象
   if (arguments.length > 3) {
     props.children = Array.prototype.slice.call(arguments, 2).map(wrapToVdom)
-  } else if (children) {
+  } else {
     props.children = wrapToVdom(children)
   }
   return {
@@ -23,6 +24,7 @@ function createElement(type, config, children) {
 }
 
 const React = {
-  createElement
+  createElement,
+  Component
 }
 export default React
