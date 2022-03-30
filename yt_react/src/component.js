@@ -1,3 +1,5 @@
+import { compareTwoVdom, findDOM } from "./react-dom"
+
 class Updater {
   constructor(classInstance) {
     this.classInstance = classInstance // 组件的实例
@@ -63,8 +65,19 @@ export class Component {
     this.updater.addState(partialState, callback)
   }
 
-  // 更新操作
+  /**
+   * 组件视图更新
+   * 1. 获取 老的虚拟DOM React元素
+   * 2. 根据最新的属性和状态计算(生成)新的虚拟dom
+   *     然后进行比较, 查找差异, 然后把这些差异同步到真实DOM上
+   */
   forceUpdate() {
-    console.log('forceUpdate')
+    let oldReactVdom = this.oldReactVdom // 由于在生成虚拟的时候有把老的虚拟dom挂载类的实例上, 所以这里是能拿到的
+    // 根据老的虚拟DOM 查找到老的 真实dom
+    let oldDOM = findDOM(oldReactVdom)
+    let newReactVdom = this.render() // 生成新的虚拟dom
+    // 拿到老真实dom的父节点, 进行对子元素的更新
+    compareTwoVdom(oldDOM.parentNode, oldReactVdom, newReactVdom) // 比较差异, 把更新同步到真是dom上
+    this.oldReactVdom = newReactVdom // 再一次替换老的虚拟dom, 进行下次更新
   }
 }

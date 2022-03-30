@@ -45,9 +45,9 @@ function createDom(vdom) {
       reconcileChildren(props.children, dom)
     }
   }
-  // 让虚拟DOM的dom属性指向它的本身的真实DOM
   // if (typeof vdom === 'object') {
-  //   vdom.dom = dom
+  // 让虚拟DOM的dom属性指向它的本身的真实DOM, 用来之后的类组件 函数组件获取到真是的dom
+  vdom.dom = dom
   // }
   return dom
 }
@@ -74,22 +74,54 @@ function updateProps(vdom, oldProps, newProps) {
 function mountFunctionComponent(vdom) {
   let { type, props } = vdom
   let renderVdom = type(props) // 调用函数组件, 返回虚拟DOM
+  vdom.oldReactVdom = renderVdom // 再挂载的时候把老的虚拟DOM 挂载到类的实例上
   return createDom(renderVdom)
 }
 // 渲染类组件
 function mountClassComponent(vdom) {
-  let { type, props } = vdom
+  let { type, props } = vdom // 该vdom type 是 类, 不是一个虚拟dom
   let classInstance = new type(props)
-  let renderVdom = classInstance.render()
-  return createDom(renderVdom)
+  let renderVdom = classInstance.render() // 这个render 是调用类里面的 render 生成虚拟DOM, 还没到转换成新的虚拟dom
+  classInstance.oldReactVdom = vdom.oldReactVdom = renderVdom // 再挂载的时候把老的虚拟DOM 挂载到类的实例上
+  return createDom(renderVdom) // 这一步才是转换成真实dom
 }
 
+// 循环子节点 渲染
 function reconcileChildren(childrenVdom, parentDom) {
   for (let i = 0; i < childrenVdom.length; i++) {
     const childVdom = childrenVdom[i];
     // 喜欢重复调用创建真实DOM元素
     render(childVdom, parentDom)
   }
+}
+
+/**
+ * 根据虚拟dom 返回真实dom
+ * @param {*} vdom 虚拟dom
+ */
+export function findDOM(vdom) {
+  let { type } = vdom
+  console.log(vdom);
+  let dom;
+  if (typeof type === 'function') { // 如果虚拟dom 是组件类型的话
+    dom = findDOM(vdom.oldReactVdom) // 递归拿到真实dom
+  } else {
+    dom = vdom.dom
+  }
+  return dom
+}
+
+/**
+ * 比较新旧的虚拟dom 找出差异, 更新到真实dom上
+ * @param {*} parentDom 真实dom的父节点
+ * @param {*} oldVdom 老虚拟dom
+ * @param {*} newVdom 新虚拟dom
+ */
+export function compareTwoVdom(parentDom, oldVdom, newVdom) {
+  let oldDOM = findDOM(oldVdom) // 获取到老的真实dom
+  let newDOM = createDom(newVdom) // 生成新的真实dom
+
+  parentDom.replaceChild(newDOM, oldDOM) // 目前没有做比较差异 直接替换
 }
 
 const ReactDom = {

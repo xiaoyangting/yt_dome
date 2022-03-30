@@ -42,7 +42,6 @@ import ReactDom from './react-dom'
   自定义组件 类型是一个函数, 类组件的父类 Component 的原型上有一个属性 isReactCpmponent={}, 就是用这个属性来判断是 类组件还是 函数组件的
 */
 class ClassElement extends React.Component {
-
   constructor(props) {
     super(props)
     this.state = {
@@ -51,6 +50,7 @@ class ClassElement extends React.Component {
   }
 
   setName = () => {
+    debugger
     this.setState({
       name: '肖杨挺'
     }, (state) => {
@@ -62,10 +62,15 @@ class ClassElement extends React.Component {
   render() {
     return (
       <h2>hello
-        <span onClick={this.setName}> {this.state.name}</span>
+        {/* <span onClick={this.setName}> {this.state.name}</span> */}
+        <FunctioElement name={this.state.name} setName={this.setName} />
       </h2>
     )
   }
+}
+
+function FunctioElement(props) {
+  return <span onClick={props.setName}> {props.name}</span>
 }
 // console.log(<Element name="react" />);
 // console.log(<ClassElement name="react" />);
