@@ -1,4 +1,5 @@
-import { REACT_TEXT } from "./constants"
+import { REACT_TEXT, REACT_FORWARD_REF_TYPE } from "./constants"
+import { addEvent } from './events'
 
 /**
  * 把虚拟DOM转成真实DOM 插入到容器中
@@ -8,6 +9,7 @@ import { REACT_TEXT } from "./constants"
 function render(vnode, container) {
   let newDom = createDom(vnode)
   container.appendChild(newDom)
+  newDom.componentDidMount && newDom.componentDidMount() // 目前挂载完成生命周期, 先放在这个地方
 }
 
 /**
@@ -15,10 +17,14 @@ function render(vnode, container) {
  * @param {*} createDom 虚拟DOM
  */
 function createDom(vdom) {
-  let { type, props } = vdom;
+  let { type, props, ref } = vdom;
   let dom;
-  if (type === REACT_TEXT || !type) { // 判断是否是文本类型, 如果是文本类型的话, 就创建文本节点
-    if (props && props.content) {
+  
+  // 如果type.$$typeof 属性是 REACT_FORWARD_REF_TYPE 值, 说明它是一个 forwardRef 类型
+  if (type && type.$$typeof === REACT_FORWARD_REF_TYPE) {
+    return mountForwardComponent(vdom)
+  } else if (type === REACT_TEXT || !type) { // 判断是否是文本类型, 如果是文本类型的话, 就创建文本节点
+    if (props && props.hasOwnProperty('content')) {
       dom = document.createTextNode(props.content);
     } else {
       dom = document.createTextNode(vdom);
@@ -48,23 +54,27 @@ function createDom(vdom) {
   // if (typeof vdom === 'object') {
   // 让虚拟DOM的dom属性指向它的本身的真实DOM, 用来之后的类组件 函数组件获取到真是的dom
   vdom.dom = dom
+  if (ref) {
+    ref.current = dom
+  }
   // }
   return dom
 }
 // 更新DOM的属性
-function updateProps(vdom, oldProps, newProps) {
+function updateProps(dom, oldProps, newProps) {
   for (const key in newProps) {
     if (Object.hasOwnProperty.call(newProps, key)) {
       if (key === 'children') { continue } // 后续会单独出来 children, 目前先跳过
       if (key === 'style') {
         let styleObj = newProps[key]
         for (const attr in styleObj) {
-          vdom.style[attr] = styleObj[attr]
+          dom.style[attr] = styleObj[attr]
         }
       } else if (key.startsWith('on')) {
-        vdom[key.toLocaleLowerCase()] = newProps[key] // 绑定事件
+        // vdom[key.toLocaleLowerCase()] = newProps[key] // 绑定事件
+        addEvent(dom, key.toLocaleLowerCase(), newProps[key])
       } else {
-        vdom[key] = newProps[key]
+        dom[key] = newProps[key]
       }
     }
   }
@@ -79,14 +89,28 @@ function mountFunctionComponent(vdom) {
 }
 // 渲染类组件
 function mountClassComponent(vdom) {
-  let { type, props } = vdom // 该vdom type 是 类, 不是一个虚拟dom
-  let classInstance = new type(props)
+  let { type, props, ref } = vdom // 该vdom type 是 类, 不是一个虚拟dom, 如果是类组件的且有ref 的情况下, 把ref 指向类的实例
+  let defaultProps = type.defaultProps || {} // 获取类里面的 默认props
+  let classInstance = new type({...defaultProps, ...props})
+  if (ref) ref.current = classInstance
+  classInstance.componentWillMount && classInstance.componentWillMount() // 类组件的生命周期, 组件将要挂载
   let renderVdom = classInstance.render() // 这个render 是调用类里面的 render 生成虚拟DOM, 还没到转换成新的虚拟dom
   classInstance.oldReactVdom = vdom.oldReactVdom = renderVdom // 再挂载的时候把老的虚拟DOM 挂载到类的实例上
-  return createDom(renderVdom) // 这一步才是转换成真实dom
+  console.log(renderVdom);
+  let dom =  createDom(renderVdom) // 这一步才是转换成真实dom
+  if (classInstance.componentDidMount)
+    dom.componentDidMount = classInstance.componentDidMount // 类组件的生命周期, 组件挂载完成, 目前位置是错的
+  return dom
+}
+// 渲染 forwardRef 组件
+function mountForwardComponent(vdom) {
+  let { type, props, ref } = vdom // 此时的type 是函数组件
+  let renderVdom = type.render(props, ref)
+  vdom.oldReactVdom = renderVdom
+  return createDom(renderVdom)
 }
 
-// 循环子节点 渲染
+// 循环子节点数组 渲染
 function reconcileChildren(childrenVdom, parentDom) {
   for (let i = 0; i < childrenVdom.length; i++) {
     const childVdom = childrenVdom[i];

@@ -3,101 +3,68 @@ import ReactDom from './react-dom'
 // import React, {component} from 'react'
 // import ReactDom from 'react-dom'
 
-// let element = <h2 style={{background: 'pink'}}>hello <span>reacr</span> </h2>
-// let element2 = React.createElement("h2", {
-//   style: {
-//     background: 'pink'
-//   },
-//   // dataName: 'xyt'
-// }, "hello ", React.createElement("span", null, "reacr"));
-// console.log(JSON.stringify(element, null, 2));
-// console.log(JSON.stringify(element2, null, 2));
-
-// 函数组件加载
-// function Element(props) {
-//   return (
-//     <h2>hello <span>{props.name}</span></h2>
-//   )
-
-//   // 这个是旧jax 编译出来的虚拟DOM数据结构, 修改下面的命令转换成旧的编译
-//   // "start": "set DISABLE_NEW_JSX_TRANSFORM=true&&react-scripts start",
-//   // "build": "set DISABLE_NEW_JSX_TRANSFORM=true&&react-scripts build",
-//   // "test": "set DISABLE_NEW_JSX_TRANSFORM=true&&react-scripts test",
-//   // "eject": "set DISABLE_NEW_JSX_TRANSFORM=true&&react-scripts eject"
-//   // return  React.createElement("h2", {
-//   //     style: {
-//   //       background: 'pink'
-//   //     },
-//   //     dataName: 'xyt'
-//   //   }, "hello ", React.createElement("span", null, props.name), " ");
-// }
-
-/*
-类组件加载 
-  组件分为内置原生组件 和 自定义组件
-  内置组件 p h1 span div等
-  自定义组件的名称必须是大写字母开头
-  自定义组件的返回值有且只能是一个根元素
-
-  自定义组件 类型是一个函数, 类组件的父类 Component 的原型上有一个属性 isReactCpmponent={}, 就是用这个属性来判断是 类组件还是 函数组件的
-*/
+function FunctionInput(props, ref) {
+  return <input type="text" ref={ref} />
+}
+const ForwardFunctionInput = React.forwardRef(FunctionInput)
 class ClassElement extends React.Component {
+  static defaultProps = { // 设置默认属性
+    name: '肖杨挺'
+  }
+  
   constructor(props) {
     super(props)
+    // this.inputClassRef = React.createRef()
+    this.inputFunctionRef = React.createRef()
     this.state = {
-      name: props.name
+      number: 0
     }
+    console.log('生命周期: 1. constructor');
   }
 
-  setName = () => {
-    debugger
-    this.setState({
-      name: '肖杨挺'
-    }, (state) => {
-      console.log('cb', state)
-    })
-    console.log(this.state)
+  setNumber = () => {
+    this.setState({number: this.state.number + 1})
   }
 
+  inputClassFocus = () => {
+    console.log(this.inputFunctionRef.current);
+    this.inputFunctionRef.current.focus()
+    // 通过ref 获取类组件 是获取类组件的实例
+    // this.inputClassRef.current.inputFocus()
+  }
+
+  componentWillMount() {
+    console.log('生命周期: 2. componentWillMount 将要挂载');
+  }
+  // setState 会引起状态的变化, 父组件更新的时候, 会让子组件的属性发生变化
+  // 当属性或者状态发生改变的话, 会走此方法来决定是否要渲染更新
+  shouldComponentUpdate(nextProps, nextState) {
+    console.log('生命周期: 5. shouldComponentUpdate 是否要更新');
+    return nextState.number % 2 === 0
+  }
+  componentWillUpdate() {
+    console.log('生命周期: 6. componentWillUpdate 将要更新');
+  }
   render() {
+    console.log('生命周期: 3. render 进行渲染');
     return (
-      <h2>hello
-        {/* <span onClick={this.setName}> {this.state.name}</span> */}
-        <FunctioElement name={this.state.name} setName={this.setName} />
+      <h2 className='H2'>
+        <span>{this.props.name}</span>
+        <div>{this.state.number}</div>
+        <button onClick={this.setNumber}>+</button>
+        {/* 类组件 */}
+        {/* <ClassInput ref={this.inputClassRef} /> */}
+        <ForwardFunctionInput ref={this.inputFunctionRef} />
+        <button onClick={this.inputClassFocus}>聚焦处理</button>
       </h2>
     )
   }
+  componentDidUpdate() {
+    console.log('生命周期: 7. componentDidUpdate 更新完成');
+  }
+  componentDidMount() {
+    console.log('生命周期: 4. componentDidMount 挂载完成');
+  }
 }
 
-function FunctioElement(props) {
-  return <span onClick={props.setName}> {props.name}</span>
-}
-// console.log(<Element name="react" />);
-// console.log(<ClassElement name="react" />);
 ReactDom.render(<ClassElement name="react" />, document.getElementById('root'))
-// React.createElement
-
-/**
- * 1. 实现 createElement 返回一个 react 元素
- * 2. 实现 render 方法, 把 react 元素变成 真实DOM 元素插入root 里面
- * 
- {
-  "type": "h2",
-  "key": null,
-  "ref": null,
-  "props": {
-    "children": [
-      "hello ",
-      {
-        "type": "span",
-        "key": null,
-        "ref": null,
-        "props": {
-          "children": "reacr"
-        }
-      },
-      " "
-    ]
-  },
-}
- */

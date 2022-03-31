@@ -1,5 +1,18 @@
 import { compareTwoVdom, findDOM } from "./react-dom"
 
+// 更新队列
+export let updateQueue = {
+  isBatchingUpdate: false, // 通过此变量来控制是否批量更新, 如果为true 的话, 就代表着批量更新
+  updaters: [], // 更新的队列数组
+  batchUpdate() { // 批量更新
+    for (const updater of updateQueue.updaters) {
+      updater.updateComponent()
+    }
+    updateQueue.updaters.length = 0
+    updateQueue.isBatchingUpdate = false
+  }
+}
+
 class Updater {
   constructor(classInstance) {
     this.classInstance = classInstance // 组件的实例
@@ -16,15 +29,21 @@ class Updater {
   }
 
   // 目前来说 不管状态和属性的变化, 都会执行此方法
-  emitUpdate() {
-    this.updateComponent() // 让组件更新
+  emitUpdate(nextProps) {
+    this.nextProps = nextProps // 后面属性变的时候 会调用 emitUpdate 传入新的nextProps
+    // 如果当前处于批量更新模式, 那么就把 此实例(Updater) 添加到更新 队列中(updateQueue)
+    if (updateQueue.isBatchingUpdate) {
+      updateQueue.updaters.push(this)
+    } else {
+      this.updateComponent() // 组件直接更新
+    }
   }
   
   // 更新
   updateComponent() {
-    let { classInstance, pendingStates } = this
+    let { classInstance, pendingStates, nextProps} = this
     if (pendingStates.length > 0) { // 如果有等待更新的话
-      shouldUpdate(classInstance, this.getState())
+      shouldUpdate(classInstance, nextProps, this.getState())
     }
   }
   
@@ -44,9 +63,20 @@ class Updater {
   }
 }
 
-function shouldUpdate(classUnstance, state) {
+function shouldUpdate(classUnstance, nextProps, state) {
+  let willUpdate = true // 是否要更新, 默认值是true
+  if (classUnstance.shouldComponentUpdate // 判断是否有此方法
+    && (!classUnstance.shouldComponentUpdate(nextProps, state))) { // 并且此方法的返回值为 false
+      willUpdate = false
+  }
+  // 如果更新阀为true 且 有更新阀方法, 那么就代表着可以更新, 就调用 组件将要更新的生命周期
+  if (willUpdate && classUnstance.shouldComponentUpdate) {
+    classUnstance.componentWillUpdate()
+  }
+  // 不管要不要更新组件, 组件的属性和类都要是最新的
+  if (nextProps) classUnstance.props = nextProps
   classUnstance.state = state
-  classUnstance.forceUpdate()
+  if (willUpdate) classUnstance.forceUpdate()
 }
 
 export class Component {
@@ -79,5 +109,7 @@ export class Component {
     // 拿到老真实dom的父节点, 进行对子元素的更新
     compareTwoVdom(oldDOM.parentNode, oldReactVdom, newReactVdom) // 比较差异, 把更新同步到真是dom上
     this.oldReactVdom = newReactVdom // 再一次替换老的虚拟dom, 进行下次更新
+    // 更新完成, 调用 组件更新完成 的 生命周期
+    if (this.componentDidUpdate) this.componentDidUpdate(this.props, this.state)
   }
 }
