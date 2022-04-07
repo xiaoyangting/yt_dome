@@ -106,10 +106,11 @@ export class Component {
     // 根据老的虚拟DOM 查找到老的 真实dom
     let oldDOM = findDOM(oldReactVdom)
     let newReactVdom = this.render() // 生成新的虚拟dom
+    let extraArgs = this.getSnapshotBeforeUpdate()
     // 拿到老真实dom的父节点, 进行对子元素的更新
     compareTwoVdom(oldDOM.parentNode, oldReactVdom, newReactVdom) // 比较差异, 把更新同步到真是dom上
     this.oldReactVdom = newReactVdom // 再一次替换老的虚拟dom, 进行下次更新
     // 更新完成, 调用 组件更新完成 的 生命周期
-    if (this.componentDidUpdate) this.componentDidUpdate(this.props, this.state)
+    if (this.componentDidUpdate) this.componentDidUpdate(this.props, this.state, extraArgs)
   }
 }

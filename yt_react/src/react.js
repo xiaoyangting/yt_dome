@@ -10,7 +10,6 @@ import { wrapToVdom } from "./utils"
  * @returns 
  */
 function createElement(type, config, children) {
-  debugger
   let props = { ...config }
   let ref; // 是用来获取虚拟dom实例
   let key; // 用来区分同一个父亲的不同儿子

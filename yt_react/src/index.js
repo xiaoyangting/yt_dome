@@ -58,7 +58,6 @@ class ClassElement extends React.Component {
   }
 
   setNumber = () => {
-    debugger
     this.setState({number: this.state.number + 1})
   }
 
@@ -71,6 +70,13 @@ class ClassElement extends React.Component {
 
   componentWillMount() {
     console.log('生命周期: 2. componentWillMount 将要挂载');
+  }
+  // 获取更新之前的dom 快照, (就是在render后调用 对比差异更新dom前调用)
+  getSnapshotBeforeUpdate() {
+    console.log('getSnapshotBeforeUpdate', document.getElementById('span'))
+    return {
+      text: document.getElementById('span').textContent
+    }
   }
   // setState 会引起状态的变化, 父组件更新的时候, 会让子组件的属性发生变化
   // 当属性或者状态发生改变的话, 会走此方法来决定是否要渲染更新
@@ -85,7 +91,7 @@ class ClassElement extends React.Component {
     console.log('生命周期: 3. render 进行渲染');
     return (
       <h2 id={`id_${this.state.number}`}>
-        <span>{this.props.name}</span>
+        <span id="span">{this.props.name}</span>
         <div>{this.state.number}</div>
         <button onClick={this.setNumber}>+</button>
         {/* 类组件 */}
@@ -96,8 +102,11 @@ class ClassElement extends React.Component {
       </h2>
     )
   }
-  componentDidUpdate() {
+  // 注意: 第三个参数是 getSnapshotBeforeUpdate 的返回值
+  componentDidUpdate(props, state, SnapshotBefore) {
     console.log('生命周期: 7. componentDidUpdate 更新完成');
+    console.log(document.getElementById('span'));
+    console.log(SnapshotBefore);
   }
   componentDidMount() {
     console.log('生命周期: 4. componentDidMount 挂载完成');

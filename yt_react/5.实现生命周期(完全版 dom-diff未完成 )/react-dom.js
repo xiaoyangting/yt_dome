@@ -99,7 +99,7 @@ function mountClassComponent(vdom) {
   classInstance.oldReactVdom = vdom.oldReactVdom = renderVdom // 再挂载的时候把老的虚拟DOM 挂载到类的实例上
   let dom = createDom(renderVdom) // 这一步才是转换成真实dom
   if (classInstance.componentDidMount)
-    dom.componentDidMount = classInstance.componentDidMount.bind(this) // 类组件的生命周期, 组件挂载完成, 目前位置是错的
+    dom.componentDidMount = classInstance.componentDidMount.bind(classInstance) // 类组件的生命周期, 组件挂载完成, 载到dom里面, 渲染完成之后再次调用
   return dom
 }
 // 渲染 forwardRef 组件
