@@ -92,6 +92,10 @@ function mountClassComponent(vdom) {
   let { type, props, ref } = vdom // 该vdom type 是 类, 不是一个虚拟dom, 如果是类组件的且有ref 的情况下, 把ref 指向类的实例
   let defaultProps = type.defaultProps || {} // 获取类里面的 默认props
   let classInstance = new type({ ...defaultProps, ...props }) // 合并默认props 和 传入的props
+  // 判断是否有 contextType, 如果有的话就说明有上下文传递, 那么就把当前存储在 contextType 的 _value 赋值给 当前实例的 context
+  if (type.contextType) {
+    classInstance.context = type.contextType.Provider._value
+  }
   vdom.classInstance = classInstance // 把实例挂载到 dom 里面
   if (ref) ref.current = classInstance
   classInstance.componentWillMount && classInstance.componentWillMount() // 类组件的生命周期, 组件将要挂载
@@ -124,7 +128,6 @@ function reconcileChildren(childrenVdom, parentDom) {
  * @param {*} vdom 虚拟dom
  */
 export function findDOM(vdom) {
-  console.log(vdom);
   let { type } = vdom
   let dom;
   if (typeof type === 'function') { // 如果虚拟dom 是组件类型的话
@@ -222,6 +225,11 @@ function updateClassComponent(oldVdom, newVdom) {
   classInstance.updater.emitUpdate(newVdom.props)
 }
 
+/**
+ * 函数组件更新
+ * @param {*} oldVdom 
+ * @param {*} newVdom 
+ */
 function updateFunctionComponent(oldVdom, newVdom) {
   let parentDOM = findDOM(oldVdom).parentNode
   let { type, props } = newVdom

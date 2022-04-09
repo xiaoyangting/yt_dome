@@ -29,6 +29,8 @@ function createElement(type, config, children) {
   } else {
     props.children = wrapToVdom(children)
   }
+  // console.log(type, config, children);
+  
   return {
     type,
     props,
@@ -56,6 +58,36 @@ function forwardRef(render) {
   }
 }
 
+/**
+ * 传递上下文到后代组件
+ * @returns 
+ */
+function createContext() {
+  function Provider(props) {// value 就是转为虚拟dom里面的一个属性,  children 是子元素
+    let { value, children } = props
+    Provider._value = value
+    return children
+  }
+
+  // 函数组件 使用
+  // Consumer 通过通过调用函数子组件 传入 Provider._value 的值进去, 使子组件获取到 context
+  function Consumer({children}) {
+    return children(Provider._value )
+  }
+  return {
+    Provider,
+    Consumer
+  }
+}
+
+const React = {
+  createElement,
+  Component,
+  createRef,
+  forwardRef,
+  createContext
+}
+export default React
 // 创建 函数组件的 ref
 /**
  * 转发ref, 通过创建新类组件 调用函数组件, 把ref 传入到函数组件中
@@ -70,10 +102,3 @@ function forwardRef(render) {
 //     }
 //  }
 // }
-const React = {
-  createElement,
-  Component,
-  createRef,
-  forwardRef
-}
-export default React

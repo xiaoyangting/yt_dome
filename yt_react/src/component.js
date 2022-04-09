@@ -41,8 +41,10 @@ class Updater {
   
   // 更新
   updateComponent() {
-    let { classInstance, pendingStates, nextProps} = this
-    if (pendingStates.length > 0) { // 如果有等待更新的话
+    let { classInstance, pendingStates, nextProps } = this
+    console.log(nextProps, this);
+    // nextProps 判断是否有子组件如果有也更新
+    if (nextProps || pendingStates.length > 0) { // 如果有等待更新的话
       shouldUpdate(classInstance, nextProps, this.getState())
     }
   }
@@ -105,8 +107,15 @@ export class Component {
     let oldReactVdom = this.oldReactVdom // 由于在生成虚拟的时候有把老的虚拟dom挂载类的实例上, 所以这里是能拿到的
     // 根据老的虚拟DOM 查找到老的 真实dom
     let oldDOM = findDOM(oldReactVdom)
+    // console.log(this.constructor);
+    if (this.constructor.contextType) {
+      this.context = this.constructor.contextType.Provider._value
+    }
     let newReactVdom = this.render() // 生成新的虚拟dom
-    let extraArgs = this.getSnapshotBeforeUpdate()
+    let extraArgs;
+    if (this.getSnapshotBeforeUpdate) {
+      extraArgs = this.getSnapshotBeforeUpdate()
+    }
     // 拿到老真实dom的父节点, 进行对子元素的更新
     compareTwoVdom(oldDOM.parentNode, oldReactVdom, newReactVdom) // 比较差异, 把更新同步到真是dom上
     this.oldReactVdom = newReactVdom // 再一次替换老的虚拟dom, 进行下次更新
