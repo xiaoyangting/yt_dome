@@ -1,9 +1,11 @@
-import React from './react'
-import ReactDom from './react-dom'
+import React from 'react'
+import ReactDom from 'react-dom'
 // import React, {component} from 'react'
 // import ReactDom from 'react-dom'
 
-class MouseTracker extends React.Component {
+// 高阶组件
+function withTracker(OldComponent) {
+  return class extends React.Component {
     constructor(props) {
       super(props)
       this.state = { y: '', x: '' }
@@ -17,14 +19,17 @@ class MouseTracker extends React.Component {
           style={{width: '100%', height: '100%'}}
           onMouseMove={this.getMouseMove}
         >
-          {
-            this.props.render && this.props.render(this.state)
-          }
+          <OldComponent {...this.state} />
         </div>
       )
     }
   }
+}
+function welcome(props) {
+  return (
+    <span>y: {props.y};  x: {props.x}</span>
+  )
+}
+const Tracker = withTracker(welcome)
 
-
-ReactDom.render(<MouseTracker />, document.getElementById('root')
-)
+ReactDom.render(<Tracker name="react" />, document.getElementById('root'))

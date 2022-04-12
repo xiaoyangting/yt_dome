@@ -27,9 +27,7 @@ function createElement(type, config, children) {
   if (arguments.length > 3) {
     props.children = Array.prototype.slice.call(arguments, 2).map(wrapToVdom)
   } else {
-    if (typeof children !== 'undefined') {
-      props.children = wrapToVdom(children)
-    }
+    props.children = wrapToVdom(children)
   }
   // console.log(type, config, children);
   

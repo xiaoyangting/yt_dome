@@ -18,7 +18,7 @@ class MouseTracker extends React.Component {
           onMouseMove={this.getMouseMove}
         >
           {
-            this.props.render && this.props.render(this.state)
+            this.props.render(this.state)
           }
         </div>
       )
@@ -26,5 +26,22 @@ class MouseTracker extends React.Component {
   }
 
 
-ReactDom.render(<MouseTracker />, document.getElementById('root')
+ReactDom.render(
+  // 往组件嵌套函数, 传入数据共享值 children
+  // <MouseTracker>
+  //   {
+  //     props => (
+  //       <span>y: {props.y};  x: {props.x}</span>
+  //     )
+  //   }
+  // </MouseTracker>,
+
+  
+  // 往组件传入渲染函数, 调用render
+  <MouseTracker render={
+    props => (
+            <span>y: {props.y};  x: {props.x}</span>
+          )
+  } />,
+  document.getElementById('root')
 )

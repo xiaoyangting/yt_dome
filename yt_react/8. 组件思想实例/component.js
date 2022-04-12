@@ -42,6 +42,7 @@ class Updater {
   // 更新
   updateComponent() {
     let { classInstance, pendingStates, nextProps } = this
+    console.log(nextProps, this);
     // nextProps 判断是否有子组件如果有也更新
     if (nextProps || pendingStates.length > 0) { // 如果有等待更新的话
       shouldUpdate(classInstance, nextProps, this.getState())
