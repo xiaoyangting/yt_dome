@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>es6 没模块化</title>
+</head>
+<body>
+
+  <!-- 
+    es6的模块 默认的加载方式 是 async, 
+    而 async 和 defer 的区别是
+      虽然都是异步加载完成的, 但是async 异步加载完成之后会立即停止正在解析的 html树( 在HTML还没解析完成时 ), 多个 async 的情况下 也是哪个标签的资源下载完成 哪个就先执行, 所以async 是不可控的, 
+      而 defer 虽然也是异步加载的, 但是资源加载完成之后, 会等待解析完HTML 树之后, 再去解析js代码, 如果多个 defer 的情况下, 他会按照在HTML 中出现的顺序下执行, 不会破坏js脚本之间的依赖关系, 那么这个时候就要知道 defer 是等前面的js 执行完成之后 再执行后面的, 之上而下的的流
+   -->
+  <script src="./index.js" type="module"></script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+    //将模块引用的信息存储在一个对象中
+    //key为路径信息，value为模块内容封装的函数
+    var __webpack_modules__ = {
+      "./src/js/common.js":
+        (function (module) {
+          console.log(module)
+          const mul = (n1, n2) => {
+            return n1 * n2
+          }
+          module.exports = {
+            mul
+          }
+        })
+    }
+
+    //用作缓存的一个对象
+    var __webpack_module_cache__ = {};
+
+    //获取模块内容的函数，moduleId为对象引用的路径
+    function __webpack_require__(moduleId) {
+      //先去缓存对象中查询
+      var cachedModule = __webpack_module_cache__[moduleId];
+      //如果缓存命中，cachedModule不为undefined，直接返回内容
+      if (cachedModule !== undefined) {
+        return cachedModule.exports;
+      }
+      //定义一个含有exports属性的对象，同时缓存起来
+      var module = __webpack_module_cache__[moduleId] = {
+        exports: {}
+      };
+      //去储存模块引用信息的对象中查找
+      //第一个参数module为上一步注册的对象
+      //其中的exports用来接收模块中module.export语法导出的内容，这也是为什么要创建这么个对象
+      //后两个参数在这个简单的例子中，用不上，我们主要理解模块化的原理
+      __webpack_modules__[moduleId](module, module.exports, __webpack_require__);
+      //返回内容
+      return module.exports;
+    }
+
+    //!function(){}()是一个立即执行的一个语法，这也是这个打包程序的入口
+    !function () {
+      //调用__webpack_require__函数，传入引用路径获取模块内容
+      const { mul } = __webpack_require__("./src/js/common.js");
+      console.log(mul(10, 20));
+    }();
+  </script>
+
+
+  <!-- <script>
+    "use strict";
+    var __webpack_modules__ = {
+      "./src/js/main.js":
+        (function (__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+          __webpack_require__.r(__webpack_exports__);
+          __webpack_require__.d(__webpack_exports__, {
+            "sum": function () { return sum; }
+          });
+          const sum = (n1, n2) => {
+            return n1 + n2
+          }
+        })
+    }
+    var __webpack_module_cache__ = {};
+    function __webpack_require__(moduleId) {
+      var cachedModule = __webpack_module_cache__[moduleId];
+      if (cachedModule !== undefined) {
+        return cachedModule.exports;
+      }
+      var module = __webpack_module_cache__[moduleId] = {
+        exports: {}
+      };
+      __webpack_modules__[moduleId](module, module.exports, __webpack_require__);
+      return module.exports;
+    }
+
+    !function () {
+      __webpack_require__.d = function (exports, definition) {
+        for (var key in definition) {
+          if (__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
+            Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+          }
+        }
+      };
+    }();
+
+    !function () {
+      __webpack_require__.o = function (obj, prop) { return Object.prototype.hasOwnProperty.call(obj, prop); }
+    }();
+
+    !function () {
+      __webpack_require__.r = function (exports) {
+        if (typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+          Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+        }
+        Object.defineProperty(exports, '__esModule', { value: true });
+      };
+    }();
+
+    var __webpack_exports__ = {};
+    !function () {
+      __webpack_require__.r(__webpack_exports__);
+      var _js_main_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__("./src/js/main.js");
+      console.log((0, _js_main_js__WEBPACK_IMPORTED_MODULE_0__.sum)(10, 20));
+    }();
+
+  </script> -->
+</body>
+
+</html>

@@ -1,0 +1,31 @@
+<template>
+  <div class="<%= data.lowerName %>">
+    <h1>{{ msg }}</h1>
+  </div>
+</template>
+
+<script>
+export default {
+  name: '<%= data.name %>',
+  props: {
+    msg: String
+  },
+  data() {
+    return {
+    }
+  },
+  created() {
+  },
+  mounted() {
+  },
+  methods: {
+  },
+};
+</script>
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style scoped>
+.<%= data.lowerName %> {
+  
+}
+</style>
